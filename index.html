@@ -89,7 +89,7 @@
     <h3 id="mTitle"></h3>
     <p id="mText"></p>
     <div class="mrow">
-      <button style="background:#f4f4f5" onclick="closeModal()">Cancelar</button>
+      <button id="mCancel" style="background:#f4f4f5">Cancelar</button>
       <button id="mOk" class="b-approve">Confirmar</button>
     </div>
   </div>
@@ -187,7 +187,7 @@
              '<input id="a-'+id+'-'+i+'" placeholder="Ajuste '+(i+1)+(i===0?' — ex.: trocar a música neste trecho':'')+'"></div>';
       }
       h += '</div>';
-      h += '<label class="l" for="o-'+id+'">Observações gerais</label><textarea id="o-'+id+'" placeholder="Comentários sobre o vídeo como um todo (opcional)"></textarea>';
+      h += '<label class="l" for="o-'+id+'">Observações gerais</label><textarea id="o-'+id+'" placeholder="O que deve ser alterado no vídeo como um todo"></textarea>';
       h += '<div class="msg" id="m-'+id+'"></div>';
       h += '<div class="actions"><button class="btn b-approve" onclick="aprovar(\''+id+'\')">✓ Aprovar vídeo</button>'+
            '<button class="btn b-adjust" onclick="ajustes(\''+id+'\')">Enviar ajustes</button></div>';
@@ -271,7 +271,12 @@
   function ajustes(id){
     var d = coletar(id), m=$('m-'+id);
     if (d.erro){ m.textContent=d.erro; return; }
-    if (!d.itens.length && d.obs.length<5){ m.textContent='Informe pelo menos um ajuste (tempo e o que mudar) ou as observações gerais.'; $('t-'+id+'-0').classList.add('err'); $('a-'+id+'-0').classList.add('err'); return; }
+    if (!d.itens.length && d.obs.length<10){
+      m.textContent='Para solicitar ajustes, descreva o que deve ser alterado: preencha o tempo e o ajuste, ou escreva nas observações gerais.';
+      $('t-'+id+'-0').classList.add('err'); $('a-'+id+'-0').classList.add('err'); $('o-'+id).classList.add('err'); $('a-'+id+'-0').focus(); return;
+    }
+    if (d.itens.some(function(x){ return x.ajuste.length<3; })){ m.textContent='Descreva melhor cada ajuste (o que deve ser alterado naquele tempo).'; return; }
+    $('o-'+id).classList.remove('err');
     m.textContent='';
     openModal('Enviar ajustes?', d.itens.length+' ajuste(s) serão enviados para a equipe. Você receberá a nova versão neste mesmo link.', 'adj', function(){
       busy(id,true);
@@ -283,13 +288,14 @@
 
   function aprovar(id){
     var d = coletar(id);
-    if (d.itens.length){ $('m-'+id).textContent='Você preencheu ajustes. Para pedir mudanças use "Enviar ajustes"; para aprovar, apague os campos de ajuste.'; return; }
-    openModal('Aprovar este vídeo?', 'Você confirma que esta versão está aprovada como final.', 'ok', function(){
+    if (d.itens.length || d.obs){ $('m-'+id).textContent='Você escreveu alterações. Para que sejam feitas, clique em "Enviar ajustes". Para aprovar, apague o que foi escrito.'; return; }
+    $('m-'+id).textContent=''; $('o-'+id).classList.remove('err');
+    openModal('Nenhuma alteração adicional?', 'Ao aprovar, este vídeo fica como versão final e não poderá mais receber ajustes. Confirma que não há nenhuma alteração a fazer?', 'ok', function(){
       busy(id,true);
       apiPost('aprovar', {id:id})
         .then(function(nv){ troca(nv); toast('Vídeo aprovado ✓'); })
         .catch(function(e){ busy(id,false); $('m-'+id).textContent=e.message; });
-    });
+    }, 'Tenho alterações', function(){ var t=$('t-'+id+'-0'); if (t){ t.scrollIntoView({behavior:'smooth', block:'center'}); t.focus(); } toast('Descreva as alterações e clique em Enviar ajustes.'); });
   }
 
   function baixar(id, btn){
@@ -304,15 +310,17 @@
   function troca(nv){ for (var i=0;i<VIDEOS.length;i++) if (VIDEOS[i].id===nv.id) VIDEOS[i]=nv; rerenderCard(nv); }
   function busy(id,b){ var c=$('c-'+id); if(c) c.querySelectorAll('.actions button').forEach(function(x){x.disabled=b;}); }
 
-  var cb=null;
-  function openModal(t, x, kind, f){
-    $('mTitle').textContent=t; $('mText').textContent=x; cb=f;
+  var cb=null, cbCancel=null;
+  function openModal(t, x, kind, f, cancelLabel, onCancel){
+    $('mTitle').textContent=t; $('mText').textContent=x; cb=f; cbCancel=onCancel||null;
     $('mOk').className = kind==='ok' ? 'b-approve' : 'b-adjust';
-    $('mOk').textContent = kind==='ok' ? 'Aprovar' : 'Enviar ajustes';
+    $('mOk').textContent = kind==='ok' ? 'Sim, aprovar' : 'Enviar ajustes';
+    $('mCancel').textContent = cancelLabel || 'Cancelar';
     $('modal').className='modal on';
   }
-  function closeModal(){ $('modal').className='modal'; cb=null; }
+  function closeModal(){ $('modal').className='modal'; cb=null; cbCancel=null; }
   $('mOk').onclick=function(){ var f=cb; closeModal(); if(f) f(); };
+  $('mCancel').onclick=function(){ var f=cbCancel; closeModal(); if(f) f(); };
   $('modal').onclick=function(e){ if(e.target.id==='modal') closeModal(); };
 
   var tt; function toast(m){ var t=$('toast'); t.textContent=m; t.className='toast on'; clearTimeout(tt); tt=setTimeout(function(){t.className='toast';},3200); }
