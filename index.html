@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Aprovação de vídeos — Rech Produtora</title>
+<style>
+  :root{
+    --bg:#f4f4f5; --card:#fff; --ink:#18181b; --muted:#71717a; --line:#e4e4e7;
+    --ok:#15803d; --ok-bg:#dcfce7; --adj:#b45309; --adj-bg:#fef3c7; --wait:#1d4ed8; --wait-bg:#dbeafe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  input,textarea{-webkit-user-select:text;user-select:text}
+  header{background:var(--ink);color:#fff;padding:22px 16px 18px}
+  .wrap{max-width:960px;margin:0 auto}
+  .brand{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.65;font-weight:600}
+  h1{margin:4px 0 2px;font-size:22px;font-weight:650}
+  .sub{opacity:.75;font-size:14px;min-height:21px}
+  main{padding:18px 16px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:22px}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:16px 16px 12px}
+  .title{font-weight:650;font-size:17px}
+  .meta{font-size:12px;color:var(--muted)}
+  .badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .b-wait{background:var(--wait-bg);color:var(--wait)} .b-adj{background:var(--adj-bg);color:var(--adj)} .b-ok{background:var(--ok-bg);color:var(--ok)}
+  .player{position:relative;background:#000;aspect-ratio:16/9;max-height:78vh;margin:0 auto;overflow:hidden}
+  .player.v{aspect-ratio:9/16;max-width:min(100%,440px)}
+  .player iframe,.player>div.yt{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .wm{position:absolute;inset:0;pointer-events:none;overflow:hidden;display:flex;flex-wrap:wrap;align-content:space-around;justify-content:space-around;opacity:.18;z-index:2}
+  .wm span{color:#fff;font-weight:700;font-size:15px;transform:rotate(-24deg);white-space:nowrap;padding:22px 18px;text-shadow:0 0 2px #000}
+  .shield-top{position:absolute;top:0;left:0;right:0;height:64px;z-index:3}
+  .shield-br{position:absolute;right:0;bottom:0;width:120px;height:46px;z-index:3}
+  .tools{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:8px 16px 0;flex-wrap:wrap}
+  .orient{display:flex;gap:6px}
+  .orient button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;color:var(--muted)}
+  .orient button.on{border-color:var(--ink);color:var(--ink);font-weight:600}
+  .ctrl{display:flex;gap:8px;align-items:center;padding:10px 16px 0;flex-wrap:wrap}
+  .ctrl button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+  .ctrl .mark{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .ctrl .now{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;margin-left:auto}
+  .body{padding:14px 16px 18px;display:flex;flex-direction:column;gap:12px}
+  .hint{font-size:13px;color:var(--muted)}
+  .rows{display:flex;flex-direction:column;gap:8px}
+  .row{display:grid;grid-template-columns:92px 1fr;gap:8px}
+  input,textarea{font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;width:100%}
+  input.tempo{text-align:center;font-variant-numeric:tabular-nums}
+  input.flash{box-shadow:0 0 0 3px var(--wait-bg);border-color:var(--wait)}
+  textarea{min-height:70px;resize:vertical}
+  .err{border-color:#b91c1c !important;box-shadow:0 0 0 3px #fee2e2}
+  .msg{font-size:13px;color:#b91c1c;min-height:0}
+  label.l{font-size:13px;font-weight:600}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{border:0;border-radius:10px;padding:13px;font:inherit;font-weight:650;cursor:pointer;text-align:center;text-decoration:none;display:block}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .b-approve{background:var(--ok);color:#fff} .b-adjust{background:var(--adj-bg);color:var(--adj)}
+  .b-wa{background:#16a34a;color:#fff} .b-dl{background:var(--ink);color:#fff}
+  .box{border-radius:12px;padding:14px;font-size:14px}
+  .box.ok{background:var(--ok-bg);color:#14532d} .box.adj{background:#fff7ed;color:#7c2d12} .box.info{background:#f4f4f5;color:#3f3f46}
+  .list{white-space:pre-wrap;font-size:13px;margin-top:6px}
+  .empty{text-align:center;color:var(--muted);padding:60px 20px}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+  .modal.on{display:flex}
+  .mbox{background:#fff;border-radius:16px;padding:22px;max-width:400px;width:100%}
+  .mbox h3{margin:0 0 6px} .mbox p{margin:0 0 18px;color:var(--muted)}
+  .mrow{display:flex;gap:8px;justify-content:flex-end}
+  .mrow button{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;z-index:30}
+  .toast.on{opacity:1}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:0 16px 30px}
+  @media (max-width:520px){ .row{grid-template-columns:78px 1fr} .actions{grid-template-columns:1fr} }
+  @media print{ body{display:none} }
+</style>
+</head>
+<body oncontextmenu="return false">
+<header>
+  <div class="wrap">
+    <div class="brand">Rech Produtora</div>
+    <h1>Aprovação de vídeos</h1>
+    <div class="sub" id="cliente"></div>
+  </div>
+</header>
+<main class="wrap"><div id="list" class="empty">Carregando…</div></main>
+<footer>Rech Produtora · Caxias do Sul</footer>
+
+<div class="modal" id="modal">
+  <div class="mbox">
+    <h3 id="mTitle"></h3>
+    <p id="mText"></p>
+    <div class="mrow">
+      <button style="background:#f4f4f5" onclick="closeModal()">Cancelar</button>
+      <button id="mOk" class="b-approve">Confirmar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  var API = 'https://script.google.com/macros/s/AKfycby97jslUyeDciUVHValKGdK7aJC5viCPvqwzTw4iGkqg-SAcTW18UR1hoohBzii7FFR/exec';
+  var TOKEN = new URLSearchParams(location.search).get('t') || '';
+  var CFG = { estudio:'Rech Produtora', whats:'5554996073398', maxAjustes:5, hoje:'', cliente:'' };
+  var VIDEOS = [], ORIENT = {}, PLAYERS = {}, YT_READY = false, TICK = null;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  // ---------- API ----------
+  function apiGet(acao, params){
+    var q = new URLSearchParams(params || {}); q.set('api', acao); q.set('t', TOKEN);
+    return fetch(API + '?' + q.toString(), { redirect:'follow' }).then(trata);
+  }
+  function apiPost(acao, body){
+    body = body || {}; body.acao = acao; body.t = TOKEN;
+    return fetch(API, { method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) }).then(trata);
+  }
+  function trata(r){
+    return r.json().catch(function(){ throw new Error('Falha de conexão. Tente de novo.'); })
+      .then(function(j){ if (!j.ok) throw new Error(j.erro || 'Erro'); return j.data; });
+  }
+
+  function load(){
+    if (!TOKEN){ fail('Link incompleto. Peça um novo link à Rech Produtora.'); return; }
+    apiGet('listar').then(function(d){
+      CFG.estudio = d.estudio || CFG.estudio; CFG.whats = d.whats || CFG.whats;
+      CFG.maxAjustes = d.maxAjustes || 5; CFG.hoje = d.hoje || ''; CFG.cliente = d.cliente || '';
+      $('cliente').textContent = CFG.cliente;
+      VIDEOS = d.videos || []; render();
+    }).catch(function(e){ fail(/inválido/i.test(e.message) ? 'Link inválido ou expirado. Fale com a Rech Produtora.' : e.message); });
+  }
+  function fail(m){ $('list').className='empty'; $('list').textContent=m; }
+
+  // ---------- render ----------
+  function render(){
+    destroyPlayers();
+    var el = $('list');
+    if (!VIDEOS.length){ el.className='empty'; el.textContent='Nenhum vídeo para aprovação no momento.'; return; }
+    el.className=''; el.innerHTML = VIDEOS.map(card).join('');
+    initPlayers();
+  }
+  function rerenderCard(v){
+    var old = $('c-'+v.id); if (!old) return render();
+    if (PLAYERS[v.id]){ try{ PLAYERS[v.id].destroy(); }catch(e){} delete PLAYERS[v.id]; }
+    var tmp = document.createElement('div'); tmp.innerHTML = card(v); old.replaceWith(tmp.firstChild);
+    initPlayers();
+  }
+
+  function badge(v){
+    if (v.status==='Aguardando aprovação') return '<span class="badge b-wait">Aguardando você</span>';
+    if (v.status==='Ajustes solicitados') return '<span class="badge b-adj">Em ajuste</span>';
+    return '<span class="badge b-ok">Aprovado ✓</span>';
+  }
+  function watermark(){
+    var t = esc('PRÉVIA · ' + CFG.cliente + ' · ' + CFG.hoje + ' · ' + CFG.estudio), s='';
+    for (var i=0;i<24;i++) s += '<span>'+t+'</span>';
+    return '<div class="wm">'+s+'</div>';
+  }
+
+  function card(v){
+    var id = esc(v.id);
+    var h = '<article class="card" id="c-'+id+'">';
+    h += '<div class="top"><div><div class="title">'+esc(v.titulo)+'</div><div class="meta">Versão '+v.versao+'</div></div>'+badge(v)+'</div>';
+
+    if (v.status==='Aguardando aprovação'){
+      var vert = ORIENT[v.id]==='v';
+      h += '<div class="tools"><span class="meta">Assista ao vídeo abaixo</span><div class="orient">'+
+           '<button class="'+(vert?'':'on')+'" onclick="orient(\''+id+'\',\'h\')">Horizontal</button>'+
+           '<button class="'+(vert?'on':'')+'" onclick="orient(\''+id+'\',\'v\')">Vertical</button></div></div>';
+      h += '<div style="padding:8px 16px 0"><div class="player'+(vert?' v':'')+'">';
+      if (v.youtube) h += '<div class="yt" id="yt-'+id+'" data-yt="'+esc(v.youtube)+'"></div>';
+      else if (v.embed) h += '<iframe src="'+esc(v.embed)+'" allow="autoplay" title="Prévia do vídeo"></iframe>';
+      h += watermark()+'<div class="shield-top"></div>'+(v.youtube?'<div class="shield-br"></div>':'')+'</div></div>';
+      if (v.youtube){
+        h += '<div class="ctrl"><button onclick="tocar(\''+id+'\')">▶︎ / ❚❚</button>'+
+             '<button class="mark" onclick="marcar(\''+id+'\')">⏱ Marcar tempo atual</button>'+
+             '<span class="now" id="now-'+id+'">00:00</span></div>';
+      }
+      h += '<div class="body">';
+      if (v.versao>1 && (v.ajustes || v.obs)){
+        h += '<div class="box info"><b>Ajustes que você pediu na versão anterior</b><div class="list">'+esc(v.ajustes)+(v.obs?'\n\nObservações: '+esc(v.obs):'')+'</div></div>';
+      }
+      h += '<div class="hint">Está tudo certo? Clique em <b>Aprovar vídeo</b>. Precisa mudar algo? '+
+           (v.youtube ? 'Pause no ponto e toque em <b>Marcar tempo atual</b>, depois descreva o ajuste.' : 'Informe o <b>tempo</b> (minutos:segundos) e o <b>ajuste</b> de cada ponto.')+'</div>';
+      h += '<div class="rows">';
+      for (var i=0;i<CFG.maxAjustes;i++){
+        h += '<div class="row"><input class="tempo" id="t-'+id+'-'+i+'" placeholder="00:00" inputmode="numeric" maxlength="8" oninput="fmtTempo(this)">'+
+             '<input id="a-'+id+'-'+i+'" placeholder="Ajuste '+(i+1)+(i===0?' — ex.: trocar a música neste trecho':'')+'"></div>';
+      }
+      h += '</div>';
+      h += '<label class="l" for="o-'+id+'">Observações gerais</label><textarea id="o-'+id+'" placeholder="Comentários sobre o vídeo como um todo (opcional)"></textarea>';
+      h += '<div class="msg" id="m-'+id+'"></div>';
+      h += '<div class="actions"><button class="btn b-approve" onclick="aprovar(\''+id+'\')">✓ Aprovar vídeo</button>'+
+           '<button class="btn b-adjust" onclick="ajustes(\''+id+'\')">Enviar ajustes</button></div>';
+      h += '</div>';
+    } else if (v.status==='Ajustes solicitados'){
+      h += '<div class="body"><div class="box adj"><b>Recebemos seus ajustes.</b> Você receberá a nova versão neste mesmo link.'+
+           '<div class="list">'+esc(v.ajustes)+(v.obs?'\n\nObservações: '+esc(v.obs):'')+'</div></div></div>';
+    } else if (v.aguardandoPagamento){
+      var txt = 'Olá! Aprovei o vídeo "'+v.titulo+'" e quero finalizar a entrega.';
+      h += '<div class="body"><div class="box ok"><b>Vídeo aprovado ✓</b><br>Entre em contato com a '+esc(CFG.estudio)+' para finalizar o processo de entrega.</div>'+
+           '<a class="btn b-wa" href="https://wa.me/'+esc(CFG.whats)+'?text='+encodeURIComponent(txt)+'" target="_blank" rel="noopener">Falar com a '+esc(CFG.estudio)+' no WhatsApp</a></div>';
+    } else {
+      h += '<div class="body"><div class="box ok"><b>Vídeo aprovado ✓</b><br>O arquivo final está liberado para download.</div>'+
+           '<button class="btn b-dl" onclick="baixar(\''+id+'\', this)">⬇ Baixar vídeo final</button></div>';
+    }
+    return h + '</article>';
+  }
+
+  function orient(id, o){ ORIENT[id]=o; var v = VIDEOS.filter(function(x){return x.id===id;})[0]; if (v) rerenderCard(v); }
+
+  // ---------- YouTube ----------
+  window.onYouTubeIframeAPIReady = function(){ YT_READY = true; initPlayers(); };
+  (function(){ var s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s); })();
+
+  function initPlayers(){
+    if (!YT_READY) return;
+    document.querySelectorAll('div.yt[data-yt]').forEach(function(el){
+      var id = el.id.slice(3); if (PLAYERS[id]) return;
+      PLAYERS[id] = new YT.Player(el.id, {
+        host: 'https://www.youtube-nocookie.com',
+        videoId: el.getAttribute('data-yt'),
+        playerVars: { rel:0, modestbranding:1, playsinline:1, fs:0, iv_load_policy:3, disablekb:0, cc_load_policy:0 }
+      });
+    });
+    if (!TICK) TICK = setInterval(function(){
+      Object.keys(PLAYERS).forEach(function(id){
+        var p = PLAYERS[id], el = $('now-'+id);
+        if (el && p && p.getCurrentTime) el.textContent = fmt(p.getCurrentTime());
+      });
+    }, 500);
+  }
+  function destroyPlayers(){ Object.keys(PLAYERS).forEach(function(id){ try{ PLAYERS[id].destroy(); }catch(e){} }); PLAYERS = {}; }
+  function fmt(s){ s=Math.floor(s||0); var h=Math.floor(s/3600), m=Math.floor((s%3600)/60), x=s%60; var mm=(m<10?'0':'')+m, ss=(x<10?'0':'')+x; return h ? h+':'+mm+':'+ss : mm+':'+ss; }
+  function tocar(id){ var p=PLAYERS[id]; if (!p || !p.getPlayerState) return; if (p.getPlayerState()===1) p.pauseVideo(); else p.playVideo(); }
+  function marcar(id){
+    var p = PLAYERS[id]; if (!p || !p.getCurrentTime) return;
+    p.pauseVideo();
+    var t = fmt(p.getCurrentTime());
+    for (var i=0;i<CFG.maxAjustes;i++){
+      var ti=$('t-'+id+'-'+i), ai=$('a-'+id+'-'+i);
+      if (!ti.value.trim() && !ai.value.trim()){
+        ti.value = t; ti.classList.add('flash'); setTimeout(function(){ ti.classList.remove('flash'); }, 1200);
+        ai.focus(); toast('Tempo '+t+' marcado. Descreva o ajuste.'); return;
+      }
+    }
+    toast('Os '+CFG.maxAjustes+' campos estão preenchidos. Use as observações gerais.');
+  }
+
+  // ---------- formulário ----------
+  function fmtTempo(el){
+    var d = el.value.replace(/\D/g,'').slice(0,6);
+    if (d.length<=2) el.value = d;
+    else if (d.length<=4) el.value = d.slice(0,d.length-2)+':'+d.slice(-2);
+    else el.value = d.slice(0,d.length-4)+':'+d.slice(-4,-2)+':'+d.slice(-2);
+    el.classList.remove('err');
+  }
+  function coletar(id){
+    var itens=[], erro=null;
+    for (var i=0;i<CFG.maxAjustes;i++){
+      var t=$('t-'+id+'-'+i), a=$('a-'+id+'-'+i);
+      t.classList.remove('err'); a.classList.remove('err');
+      var tv=t.value.trim(), av=a.value.trim();
+      if (!tv && !av) continue;
+      if (tv && !/^\d{1,2}:\d{2}(:\d{2})?$/.test(tv)){ t.classList.add('err'); erro = erro || 'Tempo inválido. Use minutos:segundos, ex.: 01:25'; }
+      if (!av){ a.classList.add('err'); erro = erro || 'Descreva o ajuste do tempo '+tv+'.'; }
+      itens.push({tempo:tv, ajuste:av});
+    }
+    return {itens:itens, obs:$('o-'+id).value.trim(), erro:erro};
+  }
+
+  function ajustes(id){
+    var d = coletar(id), m=$('m-'+id);
+    if (d.erro){ m.textContent=d.erro; return; }
+    if (!d.itens.length && d.obs.length<5){ m.textContent='Informe pelo menos um ajuste (tempo e o que mudar) ou as observações gerais.'; $('t-'+id+'-0').classList.add('err'); $('a-'+id+'-0').classList.add('err'); return; }
+    m.textContent='';
+    openModal('Enviar ajustes?', d.itens.length+' ajuste(s) serão enviados para a equipe. Você receberá a nova versão neste mesmo link.', 'adj', function(){
+      busy(id,true);
+      apiPost('ajustes', {id:id, itens:d.itens, obs:d.obs})
+        .then(function(nv){ troca(nv); toast('Ajustes enviados ✓'); })
+        .catch(function(e){ busy(id,false); m.textContent=e.message; });
+    });
+  }
+
+  function aprovar(id){
+    var d = coletar(id);
+    if (d.itens.length){ $('m-'+id).textContent='Você preencheu ajustes. Para pedir mudanças use "Enviar ajustes"; para aprovar, apague os campos de ajuste.'; return; }
+    openModal('Aprovar este vídeo?', 'Você confirma que esta versão está aprovada como final.', 'ok', function(){
+      busy(id,true);
+      apiPost('aprovar', {id:id})
+        .then(function(nv){ troca(nv); toast('Vídeo aprovado ✓'); })
+        .catch(function(e){ busy(id,false); $('m-'+id).textContent=e.message; });
+    });
+  }
+
+  function baixar(id, btn){
+    btn.disabled = true; btn.textContent = 'Preparando…';
+    var w = window.open('', '_blank');
+    apiGet('download', {id:id}).then(function(url){
+      btn.disabled=false; btn.textContent='⬇ Baixar vídeo final';
+      if (w) w.location = url; else location.href = url;
+    }).catch(function(e){ if (w) w.close(); btn.disabled=false; btn.textContent='⬇ Baixar vídeo final'; toast(e.message); });
+  }
+
+  function troca(nv){ for (var i=0;i<VIDEOS.length;i++) if (VIDEOS[i].id===nv.id) VIDEOS[i]=nv; rerenderCard(nv); }
+  function busy(id,b){ var c=$('c-'+id); if(c) c.querySelectorAll('.actions button').forEach(function(x){x.disabled=b;}); }
+
+  var cb=null;
+  function openModal(t, x, kind, f){
+    $('mTitle').textContent=t; $('mText').textContent=x; cb=f;
+    $('mOk').className = kind==='ok' ? 'b-approve' : 'b-adjust';
+    $('mOk').textContent = kind==='ok' ? 'Aprovar' : 'Enviar ajustes';
+    $('modal').className='modal on';
+  }
+  function closeModal(){ $('modal').className='modal'; cb=null; }
+  $('mOk').onclick=function(){ var f=cb; closeModal(); if(f) f(); };
+  $('modal').onclick=function(e){ if(e.target.id==='modal') closeModal(); };
+
+  var tt; function toast(m){ var t=$('toast'); t.textContent=m; t.className='toast on'; clearTimeout(tt); tt=setTimeout(function(){t.className='toast';},3200); }
+
+  document.addEventListener('keydown', function(e){
+    if ((e.ctrlKey||e.metaKey) && /^[spu]$/i.test(e.key)) e.preventDefault();
+  });
+
+  load();
+</script>
+</body>
+</html>
