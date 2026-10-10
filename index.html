@@ -56,6 +56,8 @@
   .btn:disabled{opacity:.5;cursor:wait}
   .b-approve{background:var(--ok);color:#fff} .b-adjust{background:var(--adj-bg);color:var(--adj)}
   .b-wa{background:#16a34a;color:#fff} .b-dl{background:var(--ink);color:#fff}
+  .links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px} .links .btn{margin:0;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center} .b-sec{background:#f4f4f5;color:var(--ink)}
+  @media (max-width:420px){ .links{grid-template-columns:1fr} }
   .box{border-radius:12px;padding:14px;font-size:14px}
   .box.ok{background:var(--ok-bg);color:#14532d} .box.adj{background:#fff7ed;color:#7c2d12} .box.info{background:#f4f4f5;color:#3f3f46}
   .list{white-space:pre-wrap;font-size:13px;margin-top:6px}
@@ -201,7 +203,11 @@
            '<a class="btn b-wa" href="https://wa.me/'+esc(CFG.whats)+'?text='+encodeURIComponent(txt)+'" target="_blank" rel="noopener">Falar com a '+esc(CFG.estudio)+' no WhatsApp</a></div>';
     } else {
       h += '<div class="body"><div class="box ok"><b>Vídeo aprovado ✓</b><br>O arquivo final está liberado para download.</div>'+
-           '<button class="btn b-dl" onclick="baixar(\''+id+'\', this)">⬇ Baixar vídeo final</button></div>';
+           '<button class="btn b-dl" onclick="baixar(\''+id+'\', this)">⬇ Baixar vídeo final</button>'+
+           (v.arquivoUrl ? '<div class="links">'+
+             '<button class="btn b-sec" onclick="copiarLink(\''+id+'\', this)">🔗 Copiar link do Drive</button>'+
+             (v.pastaUrl ? '<a class="btn b-sec" href="'+esc(v.pastaUrl)+'" target="_blank" rel="noopener">📁 Abrir pasta do vídeo</a>' : '')+
+           '</div>' : '')+'</div>';
     }
     return h + '</article>';
   }
@@ -305,6 +311,20 @@
       btn.disabled=false; btn.textContent='⬇ Baixar vídeo final';
       if (w) w.location = url; else location.href = url;
     }).catch(function(e){ if (w) w.close(); btn.disabled=false; btn.textContent='⬇ Baixar vídeo final'; toast(e.message); });
+  }
+
+  function copiarLink(id, btn){
+    var v = VIDEOS.filter(function(x){return x.id===id;})[0];
+    if (!v || !v.arquivoUrl) return;
+    var ok = function(){ var o=btn.textContent; btn.textContent='Copiado ✓'; setTimeout(function(){btn.textContent=o;},2000); toast('Link copiado'); };
+    var fallback = function(){
+      var ta=document.createElement('textarea'); ta.value=v.arquivoUrl; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, 99999);
+      var deu=false; try { deu=document.execCommand('copy'); } catch(e){}
+      document.body.removeChild(ta);
+      if (deu) ok(); else window.prompt('Copie o link:', v.arquivoUrl);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(v.arquivoUrl).then(ok, fallback); else fallback();
   }
 
   function troca(nv){ for (var i=0;i<VIDEOS.length;i++) if (VIDEOS[i].id===nv.id) VIDEOS[i]=nv; rerenderCard(nv); }
