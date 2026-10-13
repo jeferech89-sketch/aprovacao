@@ -164,7 +164,7 @@
     h += '<div class="top"><div><div class="title">'+esc(v.titulo)+'</div><div class="meta">Versão '+v.versao+'</div></div>'+badge(v)+'</div>';
 
     if (v.status==='Aguardando aprovação'){
-      var vert = ORIENT[v.id]==='v';
+      var vert = (ORIENT[v.id] || v.formato)==='v';
       h += '<div class="tools"><span class="meta">Assista ao vídeo abaixo</span><div class="orient">'+
            '<button class="'+(vert?'':'on')+'" onclick="orient(\''+id+'\',\'h\')">Horizontal</button>'+
            '<button class="'+(vert?'on':'')+'" onclick="orient(\''+id+'\',\'v\')">Vertical</button></div></div>';
