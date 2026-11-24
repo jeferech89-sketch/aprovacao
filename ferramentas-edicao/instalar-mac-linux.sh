@@ -6,7 +6,11 @@ cd "$(dirname "$0")"
 
 echo "== 1/5 Programas base (Python, FFmpeg, Node.js, Git) =="
 if [[ "$(uname)" == "Darwin" ]]; then
-  command -v brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  for b in /opt/homebrew/bin/brew /usr/local/bin/brew; do [[ -x $b ]] && eval "$($b shellenv)"; done
+  if ! command -v brew >/dev/null; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    for b in /opt/homebrew/bin/brew /usr/local/bin/brew; do [[ -x $b ]] && eval "$($b shellenv)"; done
+  fi
   brew install python@3.11 ffmpeg node git
   PY=python3.11
 else
