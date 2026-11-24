@@ -1,0 +1,11 @@
+# Ferramentas de IA para edição de vídeo (Python 3.10–3.12)
+# O PyTorch é instalado antes, pelo script, na versão certa (GPU NVIDIA ou CPU).
+
+whisperx                 # 01 Transcrição com tempo por palavra (legendas)
+opencv-contrib-python    # 03 YuNet (detecção de rostos) + leitura de vídeo
+mediapipe                # 04 Rosto, mãos e corpo
+transformers             # 07 Depth Anything V2 + bônus CLAP
+sam2                     # Bônus: SAM 2 (recorta objetos)
+demucs                   # Bônus: separa voz / música / ruído
+scenedetect[opencv]      # Bônus: PySceneDetect (detecta cortes de cena)
+git+https://github.com/PramaLLC/BEN2.git   # 05 BEN2 (remove fundo)
