@@ -44,3 +44,15 @@ scenedetect -i video.mp4 detect-adaptive list-scenes split-video   # corta por c
 ffmpeg -i entrada.mov -c:v libx264 -crf 18 saida.mp4               # converter
 npx hyperframes init minha-animacao                                # projeto de animação
 ```
+
+## Efeitos prontos (pasta `efeitos/`)
+
+### Texto atrás da pessoa
+Recorta a pessoa com o BEN2 e coloca um título grande entre o fundo e ela.
+
+```bash
+python efeitos/texto_atras.py video.mp4 --texto "ZUMBIDO\nTEM CURA?" --cor "#00FF88"
+```
+Opções: `--fonte arquivo.ttf`, `--altura 0.30` (0 = topo, 1 = base), `--inicio 0.5 --fim 4`,
+`--animacao zoom|subir|nenhuma`, `--saida final.mp4`.
+O recorte fica salvo em `video_mascaras/`; rodar de novo com outro texto é rápido.
